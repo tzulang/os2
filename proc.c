@@ -321,7 +321,8 @@ wait(void)
 				  t->state = 0;
 				 // t->tf = 0;
 				  t->state= UNUSED;
-				  kfree(t->kstack);
+				  if (t->kstack)
+					  kfree(t->kstack);
     		  }
     	  }
 
@@ -580,3 +581,177 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+
+
+void
+wakeupThreads(void *chan)
+{
+
+
+  struct thread *t;
+  for(t= thread->proc->threads; t < &thread->proc->threads[NTHREAD]; t++){
+		  if(t->state == SLEEPING && t->chan == chan){
+			  t->state =  RUNNABLE;
+			  }
+   }
+}
+
+
+int
+kthread_create(void*(*start_func)(), void* stack, uint stack_size){
+
+	  struct thread *t ;
+
+
+	  char *sp;
+
+	  acquire(&ptable.lock);
+	  for(t = thread->proc->threads ; t<&thread->proc->threads[NTHREAD];t++){
+	    if(t->state == UNUSED){
+	       goto found;
+	    }
+	  }
+	  release(&ptable.lock);
+	  return -1;
+
+	  found:
+	       t->state=EMBRYO;
+	       t->pid= nextpid++;
+	       increaseNumOfThreadsAlive();
+	       release(&ptable.lock);
+	       if((t->kstack = kalloc()) == 0){
+	        t->state = UNUSED;
+	        return -1;
+	       }
+	       sp = t->kstack + KSTACKSIZE;
+	       sp -= sizeof *t->tf;
+
+	       t->tf = (struct trapframe*)sp ;
+	       sp -= 4;
+	       *(uint*)sp = (uint)trapret;
+	       sp -= sizeof *t->context;
+	       t->context = (struct context*)sp;
+	       memset(t->context, 0, sizeof *t->context);
+
+
+	       t->context->eip = (uint)forkret;
+	       *t->tf=*thread->tf;
+	       t->tf->eip = (uint)start_func;
+	       t->tf->esp = (uint)(stack+stack_size);
+	       t->tf->eflags = FL_IF;
+	       t->proc = thread->proc;
+	       t->state = RUNNABLE;
+	       return t->pid;
+
+
+}
+
+int kthread_id(){
+
+	return thread->pid;
+}
+
+void kthread_exit(){
+
+
+
+
+	 struct proc *proc =thread->proc;
+
+
+	 acquire(&ptable.lock);
+
+	 thread->state= ZOMBIE;
+
+	 if (proc->numOfThreads == 1 ){  //tis is ta lst tred
+		 	release(&ptable.lock);
+		 	exit();
+
+	 }
+
+	 decreaseNumOfThreadsAlive();
+
+	 wakeup1(thread);
+
+	 sched();
+	 panic("zombie exit");
+}
+
+int kthread_join(int thread_id){
+
+
+	//printf( "thread id : %d ", thread_id);
+	  int found;
+	  struct thread *t;
+	  struct thread *threadFound;
+
+	  acquire(&ptable.lock);
+
+	  for(;;){
+	    // Scan through table looking for zombie children.
+	    found = 0;
+
+	    for(t = thread->proc->threads ; t<&thread->proc->threads[NTHREAD];t++){
+
+	      if(t->pid != thread_id)
+	        continue;
+	      found = 1;
+	      threadFound= t;
+
+	      if(t->state == ZOMBIE){
+	        // Found one.
+	        t->chan= 0;
+			t->context = 0;
+			t->pid = 0;
+			t->proc = 0;
+			t->state = 0;
+			t->state= UNUSED;
+			if (t->kstack)
+				kfree(t->kstack);
+
+	        release(&ptable.lock);
+	        return 0;
+	      }
+	    }
+
+
+	    if(!found || thread->proc->killed){
+
+	      release(&ptable.lock);
+	      return -1;
+	    }
+
+	    // Wait for thread to exit
+	    sleep(threadFound, &ptable.lock);  //DOC: wait-sleep
+
+	  }
+
+
+	  return -1;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
