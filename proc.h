@@ -1,6 +1,7 @@
 // Segments in proc->gdt.
 #define NSEGS     7
 #define NTHREAD   16
+#define MAX_MUTEXES 64
 
 // Per-CPU state
 struct cpu {
@@ -16,6 +17,7 @@ struct cpu {
   struct cpu *cpu;
   //struct proc *proc;           // The currently-running process.
   struct thread *thread;
+
 };
 
 extern struct cpu cpus[NCPU];
@@ -52,7 +54,9 @@ struct context {
 };
 
 
-enum state { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
+enum state { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE, BLOCKED, UNBLOCKED };
+enum mutex_state { UNUSED_MUTEX, USED_MUTEX};
+
 
 
 struct thread {
@@ -86,6 +90,17 @@ struct proc {
 };
 
 
+struct kthread_mutex_t {
+
+  enum mutex_state state;           // mutex state
+  int id;                     // mutex ID
+  int locked;
+  struct thread *threads_queue[NTHREAD]; //threads queue in the mutex
+  int first; // first in threads queue
+  int last; // last in threads queue
+  struct spinlock * queueLock ;
+
+};
 // Process memory is laid out contiguously, low addresses first:
 //   text
 //   original data and bss

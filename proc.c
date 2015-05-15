@@ -7,13 +7,18 @@
 #include "proc.h"
 #include "spinlock.h"
 
-
+struct {
+	struct kthread_mutex_t mutexes[MAX_MUTEXES];
+	struct spinlock mutexspinLock[MAX_MUTEXES];
+} mutextable;
 
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
 
 } ptable;
+
+
 
 static struct proc *initproc;
 
@@ -29,6 +34,8 @@ void
 pinit(void)
 {
   initlock(&ptable.lock, "ptable");
+
+
 }
 
 //PAGEBREAK: 32
@@ -47,7 +54,7 @@ allocproc(void)
 
   acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-    if(p->state == UNUSED)
+     if(p->state == UNUSED)
       goto found;
 
   release(&ptable.lock);
@@ -102,7 +109,12 @@ userinit(void)
 
   struct proc *p;
   extern char _binary_initcode_start[], _binary_initcode_size[];
+  struct kthread_mutex_t *m;
   
+  for (	 m= mutextable.mutexes; m < &mutextable.mutexes[MAX_MUTEXES]; m++){
+	  m->state=UNUSED_MUTEX;
+
+  }
   p = allocproc();
   initproc = p;
   if((p->pgdir = setupkvm()) == 0)
@@ -121,7 +133,7 @@ userinit(void)
   safestrcpy(p->name, "initcode", sizeof(p->name));
   p->cwd = namei("/");
 
-  p->numOfThreads = 0;
+  p->numOfThreads = 1;
 
   p->state = RUNNABLE;
   p->threads->state = RUNNABLE;
@@ -169,8 +181,6 @@ fork(void)
 
   // Copy process state from p.
 
-
-
   if((np->pgdir = copyuvm(proc->pgdir, proc->sz)) == 0){
     kfree(nt->kstack);
 
@@ -205,7 +215,7 @@ fork(void)
   np->state = RUNNABLE;
   nt->state = RUNNABLE;
   release(&ptable.lock);
-  
+  cprintf ("num o tred : %d \n", proc->numOfThreads);
   return pid;
 }
 
@@ -213,6 +223,7 @@ fork(void)
 void
 increaseNumOfThreadsAlive(void){
 	int i = thread->proc->numOfThreads++;
+	cprintf("num o threads %d \n" , i);
 	if(i > NTHREAD)
 		panic("Too many threads");
 }
@@ -220,7 +231,9 @@ increaseNumOfThreadsAlive(void){
 
 void
 decreaseNumOfThreadsAlive(void){
+
 	int i = thread->proc->numOfThreads--;
+	cprintf("num o threads %d 0\n" , i);
 	if(i < 0)
 		panic("Not enough threads");
 }
@@ -271,20 +284,26 @@ exit(void)
         wakeup1(initproc);
     }
   }
-  decreaseNumOfThreadsAlive();
+
+  ;
+
   proc->killed = 1;
   for (t = proc->threads; t < &proc->threads[NTHREAD]; t++){
-  		if (t->state != RUNNING && t->state != UNUSED){
+  		if (t->state != RUNNING && t->state != UNUSED && t!=thread){
   			t->state = ZOMBIE;
-  			decreaseNumOfThreadsAlive();
+  			if( thread->proc->numOfThreads>0)
+  				  	  	  decreaseNumOfThreadsAlive();
 
   		}
   	}
 
   // Jump into the scheduler, never to return.
+  if( thread->proc->numOfThreads>0)
+	  	  	  decreaseNumOfThreadsAlive();
+  thread->state = ZOMBIE;
  if(!procIsAlive())
 	  proc->state = ZOMBIE;
- thread->state = ZOMBIE;
+
 
   sched();
   panic("zombie exit");
@@ -670,10 +689,11 @@ void kthread_exit(){
 
 	 }
 
+
+
+
 	 decreaseNumOfThreadsAlive();
-
 	 wakeup1(thread);
-
 	 sched();
 	 panic("zombie exit");
 }
@@ -733,10 +753,181 @@ int kthread_join(int thread_id){
 
 
 
+int EmptyQueue(struct kthread_mutex_t *m){
+
+  return (m->threads_queue[0]==0);
+
+}
+
+void pushThreadToMutexQueue(struct thread *t , struct kthread_mutex_t *m){
+
+  if (m->last == NTHREAD)
+	  panic ("Mutex oveflow\n");
+
+
+  m->threads_queue[m->last]= t;
+
+  m->last++;
+
+}
+
+
+struct thread * popThreadToMutexQueue(struct kthread_mutex_t *m){
+
+  struct thread * toReturn = m->threads_queue[m->first];
+  int i;
+
+
+  if (toReturn==0)
+	  	  panic("Mutex over pop. Can't pop this... \n");
+
+
+  for (i =1 ; i< NTHREAD ; i++){
+
+	  m->threads_queue[i-1]= m->threads_queue[i];
+
+	  if (m->threads_queue[i]==0)
+		  break;
+
+  }
+  m->last--;
+  m->threads_queue[NTHREAD-1]=0;
+
+
+  return toReturn;
+}
+
+
+int kthread_mutex_alloc(void){
+
+    int index=0;
+    struct kthread_mutex_t *m;
+
+    for ( m= mutextable.mutexes; m < &mutextable.mutexes[MAX_MUTEXES]; m++){
+
+        if(m->state == UNUSED_MUTEX){
+          m->state = USED_MUTEX;
+          m->id = index;
+          m->queueLock= &mutextable.mutexspinLock[index];
+          initlock(m->queueLock, "mutexLock");
+          m->last = 0;
+          m->first = 0;
+          return m->id;
+        } else {
+        	index++;
+        }
+    }
+
+  return -1;
+}
+
+int kthread_mutex_dealloc(int mutex_id){
+
+  struct kthread_mutex_t *m;
+
+  cprintf("1- %d\n", mutex_id);
+  for ( m= mutextable.mutexes; m < &mutextable.mutexes[MAX_MUTEXES]; m++){
+
+
+	  if(  m->id== mutex_id ){    //mutesx is not locked
+		  cprintf("id-%d  st-%d  locked %d\n", m->id , m->state, m->locked);
+		  if(  m->state==USED_MUTEX &&  !m->locked ){
+					  m->state = UNUSED_MUTEX;
+					  m->id= -1;
+					  cprintf("dealoc\n");
+					  return 0;
+		  }
+		  return -1;
+        }
+  }
+
+  return -1;
+}
+
+int kthread_mutex_lock(int mutex_id){
+
+ // pushcli(); // disable interrupts to avoid deadlock.
+  struct kthread_mutex_t *m = &mutextable.mutexes[mutex_id];
 
 
 
+  if (m->state==UNUSED_MUTEX){
 
+		return -1;
+  }
+  acquire(m->queueLock);
+  if (m->locked == 1){ //mutex is locked so push the thread into the queue
+	 //   cprintf("the mutax is locked so thread %d is queued\n", thread->pid);
+		pushThreadToMutexQueue(thread, m);
+		acquire(&ptable.lock);
+
+		release(m->queueLock);
+		sched();
+		release(&ptable.lock);
+
+  }
+ // cprintf("the mutax is unlocked so thread %d is locking it\n", thread->pid);
+  m->locked = 1;
+
+  release(m->queueLock);
+  return 0;
+}
+
+int kthread_mutex_unlock(int mutex_id){
+
+
+
+  struct kthread_mutex_t *m = &mutextable.mutexes[mutex_id];
+  struct thread *t;
+
+  if (m->state==UNUSED_MUTEX){
+
+			return -1;
+	  }
+  acquire(m->queueLock);
+
+  if(m->locked == 0){   //mutex is unlocked already
+	  release(m->queueLock);
+	  return -1;
+  }
+
+  if(!EmptyQueue(m)){ // someone is waiting
+      t =  popThreadToMutexQueue(m);
+      acquire(&ptable.lock);
+      t->state = RUNNABLE;
+      release(&ptable.lock);
+      return 0;
+  }
+
+  //no one is waiting
+  m->locked = 0;
+  release(m->queueLock);
+  return 0;
+}
+
+
+
+int kthread_mutex_yieldlock(int mutex_id1, int mutex_id2){
+  struct kthread_mutex_t *m1, *m2;
+  struct thread *t=0;
+
+  m1 = &mutextable.mutexes[mutex_id1];
+  m2 = &mutextable.mutexes[mutex_id2];
+
+  if(m1->locked == 0){
+    return -1;
+  }
+
+  if (!EmptyQueue(m2)){ 					//someone is waiting in mutex_id2
+   t =  popThreadToMutexQueue( m2);
+   t->state = RUNNABLE;
+   return 0;
+  }
+
+  // no one is waiting in mutex_id2
+   m2->locked = 0;
+   return 0;
+}
 
 
 

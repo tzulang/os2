@@ -93,7 +93,7 @@ exec(char *path, char **argv)
   thread->proc->sz = sz;
   thread->tf->eip = elf.entry;  // main
   thread->tf->esp = sp;
-
+  thread->proc->numOfThreads=1;
   switchuvm(thread);
 
   freevm(oldpgdir);

@@ -6,6 +6,7 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
+#include "kthread.h"
 
 int
 sys_fork(void)
@@ -124,4 +125,46 @@ int sys_kthread_join(void){
 
 	return kthread_join(thread_id);
 
+}
+
+int sys_kthread_mutex_alloc(void){
+  return kthread_mutex_alloc();
+}
+
+int sys_kthread_mutex_dealloc(void){
+
+  int mutex_id;
+
+  if (argint(0, &mutex_id)<0)
+    return -1;
+  return kthread_mutex_dealloc(mutex_id);
+}
+
+int sys_kthread_mutex_lock(void){
+
+  int mutex_id;
+
+  if (argint(0, &mutex_id)<0)
+    return -1;
+  return kthread_mutex_lock(mutex_id);
+}
+
+int sys_kthread_mutex_unlock(void){
+
+  int mutex_id;
+
+  if (argint(0, &mutex_id)<0)
+    return -1;
+  return kthread_mutex_unlock(mutex_id);
+}
+
+int sys_kthread_mutex_yieldlock(void){
+
+  int mutex_id1;
+  int mutex_id2;
+
+  if (argint(0, &mutex_id1)<0 || argint(0, &mutex_id2)<0 )
+    return -1;
+
+  return kthread_mutex_yieldlock(mutex_id1, mutex_id2);
 }
