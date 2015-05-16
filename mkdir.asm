@@ -1257,8 +1257,8 @@ malloc(uint nbytes)
      88a:	c3                   	ret    
 
 0000088b <mesa_slots_monitor_alloc>:
-#include "stat.h"
 #include "user.h"
+
 
 
 
@@ -1270,12 +1270,14 @@ mesa_slots_monitor_t* mesa_slots_monitor_alloc(){
 	int mutex=  kthread_mutex_alloc() ;
      891:	e8 21 fb ff ff       	call   3b7 <kthread_mutex_alloc>
      896:	89 45 f4             	mov    %eax,-0xc(%ebp)
-	if( mutex < 0)
+	if( mutex < 0){
      899:	83 7d f4 00          	cmpl   $0x0,-0xc(%ebp)
      89d:	79 0a                	jns    8a9 <mesa_slots_monitor_alloc+0x1e>
+
 		return 0;
      89f:	b8 00 00 00 00       	mov    $0x0,%eax
      8a4:	e9 8b 00 00 00       	jmp    934 <mesa_slots_monitor_alloc+0xa9>
+	}
 
 	struct mesa_cond * empty = mesa_cond_alloc();
      8a9:	e8 44 06 00 00       	call   ef2 <mesa_cond_alloc>
@@ -1425,7 +1427,9 @@ int mesa_slots_monitor_addslots(mesa_slots_monitor_t* monitor,int n){
 
 	while ( monitor->active && monitor->slots > 0 )
      9b5:	eb 17                	jmp    9ce <mesa_slots_monitor_addslots+0x4c>
-				mesa_cond_wait( monitor->full, monitor->Monitormutex);
+	{
+		//printf(1,"grader is sleeping  %d\n ", monitor->active);
+				mesa_cond_wait( monitor->full, monitor->Monitormutex) ;
      9b7:	8b 45 08             	mov    0x8(%ebp),%eax
      9ba:	8b 10                	mov    (%eax),%edx
      9bc:	8b 45 08             	mov    0x8(%ebp),%eax
@@ -1447,7 +1451,9 @@ int mesa_slots_monitor_addslots(mesa_slots_monitor_t* monitor,int n){
      9db:	8b 40 0c             	mov    0xc(%eax),%eax
      9de:	85 c0                	test   %eax,%eax
      9e0:	7f d5                	jg     9b7 <mesa_slots_monitor_addslots+0x35>
-				mesa_cond_wait( monitor->full, monitor->Monitormutex);
+		//printf(1,"grader is sleeping  %d\n ", monitor->active);
+				mesa_cond_wait( monitor->full, monitor->Monitormutex) ;
+	}
 
 
 	if  ( monitor->active)

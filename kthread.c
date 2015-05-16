@@ -109,7 +109,11 @@ kthread_create(void*(*start_func)(), void* stack, uint stack_size){
 
 int kthread_id(){
 
+
+
+
 	return thread->pid;
+
 }
 
 void kthread_exit(){

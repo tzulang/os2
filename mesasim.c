@@ -22,6 +22,8 @@ void getSlot(void);
 
 void addSlot(void);
 
+
+
 int  main (int argc, char* argv[]){
 
 
@@ -76,10 +78,12 @@ int  main (int argc, char* argv[]){
 
 		kthread_join( studentsThread[index]);
 		free(stacks[index]);
+		index++;
+
 	}
 
 	mesa_slots_monitor_stopadding(monitor);
-
+	printf(1,"monitor stopped %d \n", monitor->active);
 	kthread_join( graderThread);
 
 	exit();
@@ -102,3 +106,4 @@ void addSlot(void){
 	printf (1, " grader stopped producing slots \n",kthread_id());
 	kthread_exit();
 }
+

@@ -10274,9 +10274,13 @@ int kthread_id(){
 80105496:	55                   	push   %ebp
 80105497:	89 e5                	mov    %esp,%ebp
 
+
+
+
 	return thread->pid;
 80105499:	65 a1 04 00 00 00    	mov    %gs:0x4,%eax
 8010549f:	8b 40 08             	mov    0x8(%eax),%eax
+
 }
 801054a2:	5d                   	pop    %ebp
 801054a3:	c3                   	ret    

@@ -13,11 +13,14 @@
 
 
 
+
 mesa_slots_monitor_t* mesa_slots_monitor_alloc(){
 
 	int mutex=  kthread_mutex_alloc() ;
-	if( mutex < 0)
+	if( mutex < 0){
+
 		return 0;
+	}
 
 	struct mesa_cond * empty = mesa_cond_alloc();
 
@@ -70,7 +73,10 @@ int mesa_slots_monitor_addslots(mesa_slots_monitor_t* monitor,int n){
 		return -1;
 
 	while ( monitor->active && monitor->slots > 0 )
-				mesa_cond_wait( monitor->full, monitor->Monitormutex);
+	{
+		//printf(1,"grader is sleeping  %d\n ", monitor->active);
+				mesa_cond_wait( monitor->full, monitor->Monitormutex) ;
+	}
 
 
 	if  ( monitor->active)

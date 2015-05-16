@@ -87,6 +87,7 @@ int  main (int argc, char* argv[]){
 
 		kthread_join( studentsThread[index]);
 		free(stacks[index]);
+		index++;
 	}
 
 	hoare_slots_monitor_stopadding(monitor);
