@@ -2,7 +2,11 @@
 #define	MESA_COND_H
 
 typedef struct mesa_cond {
-	//Your code here...
+
+
+	int mutexCV;
+	int waitinCount;
+
 } mesa_cond_t;
 
 mesa_cond_t* mesa_cond_alloc();

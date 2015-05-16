@@ -21,7 +21,7 @@ main(int argc, char *argv[])
    9:	83 7d 08 01          	cmpl   $0x1,0x8(%ebp)
    d:	7f 19                	jg     28 <main+0x28>
     printf(2, "Usage: rm files...\n");
-   f:	c7 44 24 04 8b 08 00 	movl   $0x88b,0x4(%esp)
+   f:	c7 44 24 04 54 0b 00 	movl   $0xb54,0x4(%esp)
   16:	00 
   17:	c7 04 24 02 00 00 00 	movl   $0x2,(%esp)
   1e:	e8 9c 04 00 00       	call   4bf <printf>
@@ -50,7 +50,7 @@ main(int argc, char *argv[])
   5e:	01 d0                	add    %edx,%eax
   60:	8b 00                	mov    (%eax),%eax
   62:	89 44 24 08          	mov    %eax,0x8(%esp)
-  66:	c7 44 24 04 9f 08 00 	movl   $0x89f,0x4(%esp)
+  66:	c7 44 24 04 68 0b 00 	movl   $0xb68,0x4(%esp)
   6d:	00 
   6e:	c7 04 24 02 00 00 00 	movl   $0x2,(%esp)
   75:	e8 45 04 00 00       	call   4bf <printf>
@@ -737,7 +737,7 @@ printint(int fd, int xx, int base, int sgn)
  44f:	ba 00 00 00 00       	mov    $0x0,%edx
  454:	f7 f3                	div    %ebx
  456:	89 d0                	mov    %edx,%eax
- 458:	0f b6 80 04 0b 00 00 	movzbl 0xb04(%eax),%eax
+ 458:	0f b6 80 cc 0e 00 00 	movzbl 0xecc(%eax),%eax
  45f:	88 44 0d dc          	mov    %al,-0x24(%ebp,%ecx,1)
   }while((x /= base) != 0);
  463:	8b 75 10             	mov    0x10(%ebp),%esi
@@ -887,7 +887,7 @@ printf(int fd, char *fmt, ...)
  5b1:	83 7d f4 00          	cmpl   $0x0,-0xc(%ebp)
  5b5:	75 09                	jne    5c0 <printf+0x101>
           s = "(null)";
- 5b7:	c7 45 f4 b8 08 00 00 	movl   $0x8b8,-0xc(%ebp)
+ 5b7:	c7 45 f4 81 0b 00 00 	movl   $0xb81,-0xc(%ebp)
         while(*s != 0){
  5be:	eb 1e                	jmp    5de <printf+0x11f>
  5c0:	eb 1c                	jmp    5de <printf+0x11f>
@@ -997,7 +997,7 @@ free(void *ap)
  67b:	83 e8 08             	sub    $0x8,%eax
  67e:	89 45 f8             	mov    %eax,-0x8(%ebp)
   for(p = freep; !(bp > p && bp < p->s.ptr); p = p->s.ptr)
- 681:	a1 20 0b 00 00       	mov    0xb20,%eax
+ 681:	a1 e8 0e 00 00       	mov    0xee8,%eax
  686:	89 45 fc             	mov    %eax,-0x4(%ebp)
  689:	eb 24                	jmp    6af <free+0x3d>
     if(p >= p->s.ptr && (bp > p || bp < p->s.ptr))
@@ -1091,7 +1091,7 @@ free(void *ap)
  747:	89 10                	mov    %edx,(%eax)
   freep = p;
  749:	8b 45 fc             	mov    -0x4(%ebp),%eax
- 74c:	a3 20 0b 00 00       	mov    %eax,0xb20
+ 74c:	a3 e8 0e 00 00       	mov    %eax,0xee8
 }
  751:	c9                   	leave  
  752:	c3                   	ret    
@@ -1137,7 +1137,7 @@ morecore(uint nu)
  79c:	89 04 24             	mov    %eax,(%esp)
  79f:	e8 ce fe ff ff       	call   672 <free>
   return freep;
- 7a4:	a1 20 0b 00 00       	mov    0xb20,%eax
+ 7a4:	a1 e8 0e 00 00       	mov    0xee8,%eax
 }
  7a9:	c9                   	leave  
  7aa:	c3                   	ret    
@@ -1160,18 +1160,18 @@ malloc(uint nbytes)
  7ba:	83 c0 01             	add    $0x1,%eax
  7bd:	89 45 ec             	mov    %eax,-0x14(%ebp)
   if((prevp = freep) == 0){
- 7c0:	a1 20 0b 00 00       	mov    0xb20,%eax
+ 7c0:	a1 e8 0e 00 00       	mov    0xee8,%eax
  7c5:	89 45 f0             	mov    %eax,-0x10(%ebp)
  7c8:	83 7d f0 00          	cmpl   $0x0,-0x10(%ebp)
  7cc:	75 23                	jne    7f1 <malloc+0x46>
     base.s.ptr = freep = prevp = &base;
- 7ce:	c7 45 f0 18 0b 00 00 	movl   $0xb18,-0x10(%ebp)
+ 7ce:	c7 45 f0 e0 0e 00 00 	movl   $0xee0,-0x10(%ebp)
  7d5:	8b 45 f0             	mov    -0x10(%ebp),%eax
- 7d8:	a3 20 0b 00 00       	mov    %eax,0xb20
- 7dd:	a1 20 0b 00 00       	mov    0xb20,%eax
- 7e2:	a3 18 0b 00 00       	mov    %eax,0xb18
+ 7d8:	a3 e8 0e 00 00       	mov    %eax,0xee8
+ 7dd:	a1 e8 0e 00 00       	mov    0xee8,%eax
+ 7e2:	a3 e0 0e 00 00       	mov    %eax,0xee0
     base.s.size = 0;
- 7e7:	c7 05 1c 0b 00 00 00 	movl   $0x0,0xb1c
+ 7e7:	c7 05 e4 0e 00 00 00 	movl   $0x0,0xee4
  7ee:	00 00 00 
   }
   for(p = prevp->s.ptr; ; prevp = p, p = p->s.ptr){
@@ -1214,14 +1214,14 @@ malloc(uint nbytes)
       }
       freep = prevp;
  841:	8b 45 f0             	mov    -0x10(%ebp),%eax
- 844:	a3 20 0b 00 00       	mov    %eax,0xb20
+ 844:	a3 e8 0e 00 00       	mov    %eax,0xee8
       return (void*)(p + 1);
  849:	8b 45 f4             	mov    -0xc(%ebp),%eax
  84c:	83 c0 08             	add    $0x8,%eax
  84f:	eb 38                	jmp    889 <malloc+0xde>
     }
     if(p == freep)
- 851:	a1 20 0b 00 00       	mov    0xb20,%eax
+ 851:	a1 e8 0e 00 00       	mov    0xee8,%eax
  856:	39 45 f4             	cmp    %eax,-0xc(%ebp)
  859:	75 1b                	jne    876 <malloc+0xcb>
       if((p = morecore(nunits)) == 0)
@@ -1255,3 +1255,423 @@ malloc(uint nbytes)
 }
  889:	c9                   	leave  
  88a:	c3                   	ret    
+
+0000088b <hoare_cond_alloc>:
+#include "types.h"
+#include "stat.h"
+#include "user.h"
+
+
+hoare_cond_t* hoare_cond_alloc(){
+ 88b:	55                   	push   %ebp
+ 88c:	89 e5                	mov    %esp,%ebp
+ 88e:	83 ec 28             	sub    $0x28,%esp
+
+	int cvMutex= kthread_mutex_alloc();
+ 891:	e8 21 fb ff ff       	call   3b7 <kthread_mutex_alloc>
+ 896:	89 45 f4             	mov    %eax,-0xc(%ebp)
+
+	if (cvMutex<0)
+ 899:	83 7d f4 00          	cmpl   $0x0,-0xc(%ebp)
+ 89d:	79 07                	jns    8a6 <hoare_cond_alloc+0x1b>
+		return 0;
+ 89f:	b8 00 00 00 00       	mov    $0x0,%eax
+ 8a4:	eb 24                	jmp    8ca <hoare_cond_alloc+0x3f>
+
+	hoare_cond_t *hcond = malloc( sizeof (hoare_cond_t)) ;
+ 8a6:	c7 04 24 08 00 00 00 	movl   $0x8,(%esp)
+ 8ad:	e8 f9 fe ff ff       	call   7ab <malloc>
+ 8b2:	89 45 f0             	mov    %eax,-0x10(%ebp)
+
+	hcond->mutexCV=cvMutex;
+ 8b5:	8b 45 f0             	mov    -0x10(%ebp),%eax
+ 8b8:	8b 55 f4             	mov    -0xc(%ebp),%edx
+ 8bb:	89 10                	mov    %edx,(%eax)
+	hcond->waitinCount=0;
+ 8bd:	8b 45 f0             	mov    -0x10(%ebp),%eax
+ 8c0:	c7 40 04 00 00 00 00 	movl   $0x0,0x4(%eax)
+
+	return hcond;
+ 8c7:	8b 45 f0             	mov    -0x10(%ebp),%eax
+}
+ 8ca:	c9                   	leave  
+ 8cb:	c3                   	ret    
+
+000008cc <hoare_cond_dealloc>:
+
+
+int hoare_cond_dealloc(hoare_cond_t* hCond){
+ 8cc:	55                   	push   %ebp
+ 8cd:	89 e5                	mov    %esp,%ebp
+ 8cf:	83 ec 18             	sub    $0x18,%esp
+
+	if (!hCond ){
+ 8d2:	83 7d 08 00          	cmpl   $0x0,0x8(%ebp)
+ 8d6:	75 07                	jne    8df <hoare_cond_dealloc+0x13>
+			return -1;
+ 8d8:	b8 ff ff ff ff       	mov    $0xffffffff,%eax
+ 8dd:	eb 35                	jmp    914 <hoare_cond_dealloc+0x48>
+		}
+
+		kthread_mutex_unlock(hCond->mutexCV);
+ 8df:	8b 45 08             	mov    0x8(%ebp),%eax
+ 8e2:	8b 00                	mov    (%eax),%eax
+ 8e4:	89 04 24             	mov    %eax,(%esp)
+ 8e7:	e8 e3 fa ff ff       	call   3cf <kthread_mutex_unlock>
+		if(	kthread_mutex_dealloc(hCond->mutexCV) <0)
+ 8ec:	8b 45 08             	mov    0x8(%ebp),%eax
+ 8ef:	8b 00                	mov    (%eax),%eax
+ 8f1:	89 04 24             	mov    %eax,(%esp)
+ 8f4:	e8 c6 fa ff ff       	call   3bf <kthread_mutex_dealloc>
+ 8f9:	85 c0                	test   %eax,%eax
+ 8fb:	79 07                	jns    904 <hoare_cond_dealloc+0x38>
+			return -1;
+ 8fd:	b8 ff ff ff ff       	mov    $0xffffffff,%eax
+ 902:	eb 10                	jmp    914 <hoare_cond_dealloc+0x48>
+
+		free (hCond);
+ 904:	8b 45 08             	mov    0x8(%ebp),%eax
+ 907:	89 04 24             	mov    %eax,(%esp)
+ 90a:	e8 63 fd ff ff       	call   672 <free>
+		return 0;
+ 90f:	b8 00 00 00 00       	mov    $0x0,%eax
+}
+ 914:	c9                   	leave  
+ 915:	c3                   	ret    
+
+00000916 <hoare_cond_wait>:
+
+
+int hoare_cond_wait(hoare_cond_t* hCond, int mutex_id){
+ 916:	55                   	push   %ebp
+ 917:	89 e5                	mov    %esp,%ebp
+ 919:	83 ec 18             	sub    $0x18,%esp
+
+	if (!hCond){
+ 91c:	83 7d 08 00          	cmpl   $0x0,0x8(%ebp)
+ 920:	75 07                	jne    929 <hoare_cond_wait+0x13>
+			return -1;
+ 922:	b8 ff ff ff ff       	mov    $0xffffffff,%eax
+ 927:	eb 42                	jmp    96b <hoare_cond_wait+0x55>
+		}
+
+	hCond->waitinCount++;
+ 929:	8b 45 08             	mov    0x8(%ebp),%eax
+ 92c:	8b 40 04             	mov    0x4(%eax),%eax
+ 92f:	8d 50 01             	lea    0x1(%eax),%edx
+ 932:	8b 45 08             	mov    0x8(%ebp),%eax
+ 935:	89 50 04             	mov    %edx,0x4(%eax)
+
+
+	if ( kthread_mutex_yieldlock(mutex_id, hCond->mutexCV)<0)
+ 938:	8b 45 08             	mov    0x8(%ebp),%eax
+ 93b:	8b 00                	mov    (%eax),%eax
+ 93d:	89 44 24 04          	mov    %eax,0x4(%esp)
+ 941:	8b 45 0c             	mov    0xc(%ebp),%eax
+ 944:	89 04 24             	mov    %eax,(%esp)
+ 947:	e8 8b fa ff ff       	call   3d7 <kthread_mutex_yieldlock>
+ 94c:	85 c0                	test   %eax,%eax
+ 94e:	79 16                	jns    966 <hoare_cond_wait+0x50>
+		{
+			hCond->waitinCount--;
+ 950:	8b 45 08             	mov    0x8(%ebp),%eax
+ 953:	8b 40 04             	mov    0x4(%eax),%eax
+ 956:	8d 50 ff             	lea    -0x1(%eax),%edx
+ 959:	8b 45 08             	mov    0x8(%ebp),%eax
+ 95c:	89 50 04             	mov    %edx,0x4(%eax)
+			return -1;
+ 95f:	b8 ff ff ff ff       	mov    $0xffffffff,%eax
+ 964:	eb 05                	jmp    96b <hoare_cond_wait+0x55>
+		}
+
+	return 0;
+ 966:	b8 00 00 00 00       	mov    $0x0,%eax
+}
+ 96b:	c9                   	leave  
+ 96c:	c3                   	ret    
+
+0000096d <hoare_cond_signal>:
+
+
+
+int hoare_cond_signal(hoare_cond_t* hCond, int mutex_id)
+{
+ 96d:	55                   	push   %ebp
+ 96e:	89 e5                	mov    %esp,%ebp
+ 970:	83 ec 18             	sub    $0x18,%esp
+
+	if (!hCond){
+ 973:	83 7d 08 00          	cmpl   $0x0,0x8(%ebp)
+ 977:	75 07                	jne    980 <hoare_cond_signal+0x13>
+		return -1;
+ 979:	b8 ff ff ff ff       	mov    $0xffffffff,%eax
+ 97e:	eb 6b                	jmp    9eb <hoare_cond_signal+0x7e>
+	}
+
+    if ( hCond->waitinCount >0){
+ 980:	8b 45 08             	mov    0x8(%ebp),%eax
+ 983:	8b 40 04             	mov    0x4(%eax),%eax
+ 986:	85 c0                	test   %eax,%eax
+ 988:	7e 3d                	jle    9c7 <hoare_cond_signal+0x5a>
+    	hCond->waitinCount--;
+ 98a:	8b 45 08             	mov    0x8(%ebp),%eax
+ 98d:	8b 40 04             	mov    0x4(%eax),%eax
+ 990:	8d 50 ff             	lea    -0x1(%eax),%edx
+ 993:	8b 45 08             	mov    0x8(%ebp),%eax
+ 996:	89 50 04             	mov    %edx,0x4(%eax)
+		if  (kthread_mutex_yieldlock(mutex_id, hCond->mutexCV)<0){
+ 999:	8b 45 08             	mov    0x8(%ebp),%eax
+ 99c:	8b 00                	mov    (%eax),%eax
+ 99e:	89 44 24 04          	mov    %eax,0x4(%esp)
+ 9a2:	8b 45 0c             	mov    0xc(%ebp),%eax
+ 9a5:	89 04 24             	mov    %eax,(%esp)
+ 9a8:	e8 2a fa ff ff       	call   3d7 <kthread_mutex_yieldlock>
+ 9ad:	85 c0                	test   %eax,%eax
+ 9af:	79 16                	jns    9c7 <hoare_cond_signal+0x5a>
+			hCond->waitinCount++;
+ 9b1:	8b 45 08             	mov    0x8(%ebp),%eax
+ 9b4:	8b 40 04             	mov    0x4(%eax),%eax
+ 9b7:	8d 50 01             	lea    0x1(%eax),%edx
+ 9ba:	8b 45 08             	mov    0x8(%ebp),%eax
+ 9bd:	89 50 04             	mov    %edx,0x4(%eax)
+			return -1;
+ 9c0:	b8 ff ff ff ff       	mov    $0xffffffff,%eax
+ 9c5:	eb 24                	jmp    9eb <hoare_cond_signal+0x7e>
+		}
+    }
+
+    if  (kthread_mutex_yieldlock(mutex_id, hCond->mutexCV)<0){
+ 9c7:	8b 45 08             	mov    0x8(%ebp),%eax
+ 9ca:	8b 00                	mov    (%eax),%eax
+ 9cc:	89 44 24 04          	mov    %eax,0x4(%esp)
+ 9d0:	8b 45 0c             	mov    0xc(%ebp),%eax
+ 9d3:	89 04 24             	mov    %eax,(%esp)
+ 9d6:	e8 fc f9 ff ff       	call   3d7 <kthread_mutex_yieldlock>
+ 9db:	85 c0                	test   %eax,%eax
+ 9dd:	79 07                	jns    9e6 <hoare_cond_signal+0x79>
+
+    			return -1;
+ 9df:	b8 ff ff ff ff       	mov    $0xffffffff,%eax
+ 9e4:	eb 05                	jmp    9eb <hoare_cond_signal+0x7e>
+    }
+
+	return 0;
+ 9e6:	b8 00 00 00 00       	mov    $0x0,%eax
+
+}
+ 9eb:	c9                   	leave  
+ 9ec:	c3                   	ret    
+
+000009ed <mesa_cond_alloc>:
+#include  "mesa_cond.h"
+#include "types.h"
+#include "stat.h"
+#include "user.h"
+
+mesa_cond_t* mesa_cond_alloc(){
+ 9ed:	55                   	push   %ebp
+ 9ee:	89 e5                	mov    %esp,%ebp
+ 9f0:	83 ec 28             	sub    $0x28,%esp
+
+	int cvMutex= kthread_mutex_alloc();
+ 9f3:	e8 bf f9 ff ff       	call   3b7 <kthread_mutex_alloc>
+ 9f8:	89 45 f4             	mov    %eax,-0xc(%ebp)
+
+	if (cvMutex<0)
+ 9fb:	83 7d f4 00          	cmpl   $0x0,-0xc(%ebp)
+ 9ff:	79 07                	jns    a08 <mesa_cond_alloc+0x1b>
+		return 0;
+ a01:	b8 00 00 00 00       	mov    $0x0,%eax
+ a06:	eb 24                	jmp    a2c <mesa_cond_alloc+0x3f>
+
+	mesa_cond_t *mcond = malloc( sizeof (mesa_cond_t)) ;
+ a08:	c7 04 24 08 00 00 00 	movl   $0x8,(%esp)
+ a0f:	e8 97 fd ff ff       	call   7ab <malloc>
+ a14:	89 45 f0             	mov    %eax,-0x10(%ebp)
+
+	mcond->mutexCV=cvMutex;
+ a17:	8b 45 f0             	mov    -0x10(%ebp),%eax
+ a1a:	8b 55 f4             	mov    -0xc(%ebp),%edx
+ a1d:	89 10                	mov    %edx,(%eax)
+	mcond->waitinCount=0;
+ a1f:	8b 45 f0             	mov    -0x10(%ebp),%eax
+ a22:	c7 40 04 00 00 00 00 	movl   $0x0,0x4(%eax)
+
+	return mcond;
+ a29:	8b 45 f0             	mov    -0x10(%ebp),%eax
+}
+ a2c:	c9                   	leave  
+ a2d:	c3                   	ret    
+
+00000a2e <mesa_cond_dealloc>:
+
+
+int mesa_cond_dealloc(mesa_cond_t* mCond){
+ a2e:	55                   	push   %ebp
+ a2f:	89 e5                	mov    %esp,%ebp
+ a31:	83 ec 18             	sub    $0x18,%esp
+
+	if (!mCond ){
+ a34:	83 7d 08 00          	cmpl   $0x0,0x8(%ebp)
+ a38:	75 07                	jne    a41 <mesa_cond_dealloc+0x13>
+		return -1;
+ a3a:	b8 ff ff ff ff       	mov    $0xffffffff,%eax
+ a3f:	eb 35                	jmp    a76 <mesa_cond_dealloc+0x48>
+	}
+
+	kthread_mutex_unlock(mCond->mutexCV);
+ a41:	8b 45 08             	mov    0x8(%ebp),%eax
+ a44:	8b 00                	mov    (%eax),%eax
+ a46:	89 04 24             	mov    %eax,(%esp)
+ a49:	e8 81 f9 ff ff       	call   3cf <kthread_mutex_unlock>
+	if(	kthread_mutex_dealloc(mCond->mutexCV) <0)
+ a4e:	8b 45 08             	mov    0x8(%ebp),%eax
+ a51:	8b 00                	mov    (%eax),%eax
+ a53:	89 04 24             	mov    %eax,(%esp)
+ a56:	e8 64 f9 ff ff       	call   3bf <kthread_mutex_dealloc>
+ a5b:	85 c0                	test   %eax,%eax
+ a5d:	79 07                	jns    a66 <mesa_cond_dealloc+0x38>
+		return -1;
+ a5f:	b8 ff ff ff ff       	mov    $0xffffffff,%eax
+ a64:	eb 10                	jmp    a76 <mesa_cond_dealloc+0x48>
+
+	free (mCond);
+ a66:	8b 45 08             	mov    0x8(%ebp),%eax
+ a69:	89 04 24             	mov    %eax,(%esp)
+ a6c:	e8 01 fc ff ff       	call   672 <free>
+	return 0;
+ a71:	b8 00 00 00 00       	mov    $0x0,%eax
+
+}
+ a76:	c9                   	leave  
+ a77:	c3                   	ret    
+
+00000a78 <mesa_cond_wait>:
+
+
+int mesa_cond_wait(mesa_cond_t* mCond,int mutex_id){
+ a78:	55                   	push   %ebp
+ a79:	89 e5                	mov    %esp,%ebp
+ a7b:	83 ec 18             	sub    $0x18,%esp
+
+	if (!mCond){
+ a7e:	83 7d 08 00          	cmpl   $0x0,0x8(%ebp)
+ a82:	75 07                	jne    a8b <mesa_cond_wait+0x13>
+		return -1;
+ a84:	b8 ff ff ff ff       	mov    $0xffffffff,%eax
+ a89:	eb 55                	jmp    ae0 <mesa_cond_wait+0x68>
+	}
+	mCond->waitinCount++;
+ a8b:	8b 45 08             	mov    0x8(%ebp),%eax
+ a8e:	8b 40 04             	mov    0x4(%eax),%eax
+ a91:	8d 50 01             	lea    0x1(%eax),%edx
+ a94:	8b 45 08             	mov    0x8(%ebp),%eax
+ a97:	89 50 04             	mov    %edx,0x4(%eax)
+	if (kthread_mutex_unlock(mutex_id)<0 &&
+ a9a:	8b 45 0c             	mov    0xc(%ebp),%eax
+ a9d:	89 04 24             	mov    %eax,(%esp)
+ aa0:	e8 2a f9 ff ff       	call   3cf <kthread_mutex_unlock>
+ aa5:	85 c0                	test   %eax,%eax
+ aa7:	79 27                	jns    ad0 <mesa_cond_wait+0x58>
+		kthread_mutex_lock(mCond->mutexCV))
+ aa9:	8b 45 08             	mov    0x8(%ebp),%eax
+ aac:	8b 00                	mov    (%eax),%eax
+ aae:	89 04 24             	mov    %eax,(%esp)
+ ab1:	e8 11 f9 ff ff       	call   3c7 <kthread_mutex_lock>
+
+	if (!mCond){
+		return -1;
+	}
+	mCond->waitinCount++;
+	if (kthread_mutex_unlock(mutex_id)<0 &&
+ ab6:	85 c0                	test   %eax,%eax
+ ab8:	74 16                	je     ad0 <mesa_cond_wait+0x58>
+		kthread_mutex_lock(mCond->mutexCV))
+	{
+		mCond->waitinCount--;
+ aba:	8b 45 08             	mov    0x8(%ebp),%eax
+ abd:	8b 40 04             	mov    0x4(%eax),%eax
+ ac0:	8d 50 ff             	lea    -0x1(%eax),%edx
+ ac3:	8b 45 08             	mov    0x8(%ebp),%eax
+ ac6:	89 50 04             	mov    %edx,0x4(%eax)
+		return -1;
+ ac9:	b8 ff ff ff ff       	mov    $0xffffffff,%eax
+ ace:	eb 10                	jmp    ae0 <mesa_cond_wait+0x68>
+	}
+
+
+	kthread_mutex_lock(mutex_id);
+ ad0:	8b 45 0c             	mov    0xc(%ebp),%eax
+ ad3:	89 04 24             	mov    %eax,(%esp)
+ ad6:	e8 ec f8 ff ff       	call   3c7 <kthread_mutex_lock>
+	return 0;
+ adb:	b8 00 00 00 00       	mov    $0x0,%eax
+
+
+}
+ ae0:	c9                   	leave  
+ ae1:	c3                   	ret    
+
+00000ae2 <mesa_cond_signal>:
+
+int mesa_cond_signal(mesa_cond_t* mCond){
+ ae2:	55                   	push   %ebp
+ ae3:	89 e5                	mov    %esp,%ebp
+ ae5:	83 ec 18             	sub    $0x18,%esp
+
+	if (!mCond){
+ ae8:	83 7d 08 00          	cmpl   $0x0,0x8(%ebp)
+ aec:	75 07                	jne    af5 <mesa_cond_signal+0x13>
+		return -1;
+ aee:	b8 ff ff ff ff       	mov    $0xffffffff,%eax
+ af3:	eb 5d                	jmp    b52 <mesa_cond_signal+0x70>
+	}
+
+	if (mCond->waitinCount>0){
+ af5:	8b 45 08             	mov    0x8(%ebp),%eax
+ af8:	8b 40 04             	mov    0x4(%eax),%eax
+ afb:	85 c0                	test   %eax,%eax
+ afd:	7e 36                	jle    b35 <mesa_cond_signal+0x53>
+		 mCond->waitinCount --;
+ aff:	8b 45 08             	mov    0x8(%ebp),%eax
+ b02:	8b 40 04             	mov    0x4(%eax),%eax
+ b05:	8d 50 ff             	lea    -0x1(%eax),%edx
+ b08:	8b 45 08             	mov    0x8(%ebp),%eax
+ b0b:	89 50 04             	mov    %edx,0x4(%eax)
+		 if (kthread_mutex_unlock(mCond->mutexCV)>=0){
+ b0e:	8b 45 08             	mov    0x8(%ebp),%eax
+ b11:	8b 00                	mov    (%eax),%eax
+ b13:	89 04 24             	mov    %eax,(%esp)
+ b16:	e8 b4 f8 ff ff       	call   3cf <kthread_mutex_unlock>
+ b1b:	85 c0                	test   %eax,%eax
+ b1d:	78 16                	js     b35 <mesa_cond_signal+0x53>
+			 mCond->waitinCount ++;
+ b1f:	8b 45 08             	mov    0x8(%ebp),%eax
+ b22:	8b 40 04             	mov    0x4(%eax),%eax
+ b25:	8d 50 01             	lea    0x1(%eax),%edx
+ b28:	8b 45 08             	mov    0x8(%ebp),%eax
+ b2b:	89 50 04             	mov    %edx,0x4(%eax)
+			 return -1;
+ b2e:	b8 ff ff ff ff       	mov    $0xffffffff,%eax
+ b33:	eb 1d                	jmp    b52 <mesa_cond_signal+0x70>
+		 }
+	}
+
+	if (kthread_mutex_unlock(mCond->mutexCV)<0){
+ b35:	8b 45 08             	mov    0x8(%ebp),%eax
+ b38:	8b 00                	mov    (%eax),%eax
+ b3a:	89 04 24             	mov    %eax,(%esp)
+ b3d:	e8 8d f8 ff ff       	call   3cf <kthread_mutex_unlock>
+ b42:	85 c0                	test   %eax,%eax
+ b44:	79 07                	jns    b4d <mesa_cond_signal+0x6b>
+
+		return -1;
+ b46:	b8 ff ff ff ff       	mov    $0xffffffff,%eax
+ b4b:	eb 05                	jmp    b52 <mesa_cond_signal+0x70>
+	}
+	return 0;
+ b4d:	b8 00 00 00 00       	mov    $0x0,%eax
+
+}
+ b52:	c9                   	leave  
+ b53:	c3                   	ret    

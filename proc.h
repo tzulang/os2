@@ -90,17 +90,6 @@ struct proc {
 };
 
 
-struct kthread_mutex_t {
-
-  enum mutex_state state;           // mutex state
-  int id;                     // mutex ID
-  int locked;
-  struct thread *threads_queue[NTHREAD]; //threads queue in the mutex
-  int first; // first in threads queue
-  int last; // last in threads queue
-  struct spinlock * queueLock ;
-
-};
 // Process memory is laid out contiguously, low addresses first:
 //   text
 //   original data and bss

@@ -8,6 +8,19 @@
 
 // Per-process state
 
+
+struct kthread_mutex_t {
+
+  enum mutex_state state;           // mutex state
+  int id;                     // mutex ID
+  int locked;
+  struct thread *threads_queue[NTHREAD]; //threads queue in the mutex
+  int first; // first in threads queue
+  int last; // last in threads queue
+  struct spinlock * queueLock ;
+
+};
+
 int kthread_create(void*(*start_func)(), void* stack, uint stack_size);
 int kthread_id();
 void kthread_exit();

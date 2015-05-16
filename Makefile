@@ -16,6 +16,7 @@ OBJS = \
 	pipe.o\
 	proc.o\
 	spinlock.o\
+	kthread.o\
 	string.o\
 	swtch.o\
 	syscall.o\
@@ -27,6 +28,9 @@ OBJS = \
 	uart.o\
 	vectors.o\
 	vm.o\
+	
+	
+
 	
 
 # Cross-compiling (e.g., on Mac OS X)
@@ -135,7 +139,7 @@ tags: $(OBJS) entryother.S _init
 vectors.S: vectors.pl
 	perl vectors.pl > vectors.S
 
-ULIB = ulib.o usys.o printf.o umalloc.o
+ULIB = ulib.o usys.o printf.o umalloc.o hoare_cond.o mesa_cond.o
 
 _%: %.o $(ULIB)
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^
@@ -170,7 +174,6 @@ UPROGS=\
 	_rm\
 	_sh\
 	_stressfs\
-	_usertests\
 	_wc\
 	_zombie\
 	_t\
