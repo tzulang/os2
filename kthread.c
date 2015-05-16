@@ -24,13 +24,14 @@ int nextpid = 1;
 extern void forkret(void);
 extern void trapret(void);
 extern void forkret(void);
-
+extern int procIsAlive(void);
 
 extern void wakeup1(void *chan);
 
 
 void
 increaseNumOfThreadsAlive(void){
+
 	int i = thread->proc->numOfThreads++;
 	//cprintf("num o threads %d \n" , i);
 	if(i > NTHREAD)
@@ -77,7 +78,7 @@ kthread_create(void*(*start_func)(), void* stack, uint stack_size){
 	  found:
 	       t->state=EMBRYO;
 	       t->pid= nextpid++;
-	       increaseNumOfThreadsAlive();
+	     //  increaseNumOfThreadsAlive();
 	       release(&ptable.lock);
 	       if((t->kstack = kalloc()) == 0){
 	        t->state = UNUSED;
@@ -116,20 +117,21 @@ void kthread_exit(){
 
 
 
-	 struct proc *proc =thread->proc;
+	 //struct proc *proc =thread->proc;
 
 
 	 acquire(&ptable.lock);
 
 	 thread->state= ZOMBIE;
 
-	 if (proc->numOfThreads == 1 ){  //tis is ta lst tred
+	 if (!procIsAlive()  ){  //tis is ta lst tred
 		 	release(&ptable.lock);
 		 	exit();
 
 	 }
 
-	 decreaseNumOfThreadsAlive();
+	 //decreaseNumOfThreadsAlive();
+
 	 wakeup1(thread);
 	 sched();
 	 panic("zombie exit");
@@ -138,7 +140,7 @@ void kthread_exit(){
 int kthread_join(int thread_id){
 
 
-	//printf( "thread id : %d ", thread_id);
+	//cprintf( " %p   %p\n ", mutextable.mutexes[0].queueLock->cpu->id, cpu->id);
 	  int found;
 	  struct thread *t;
 	  struct thread *threadFound;
@@ -146,7 +148,7 @@ int kthread_join(int thread_id){
 	  acquire(&ptable.lock);
 
 	  for(;;){
-	    // Scan through table looking for zombie children.
+
 	    found = 0;
 
 	    for(t = thread->proc->threads ; t<&thread->proc->threads[NTHREAD];t++){
@@ -180,6 +182,7 @@ int kthread_join(int thread_id){
 	    }
 
 	    // Wait for thread to exit
+	  //  cprintf("cpu ncli: %d \n",cpu->ncli);
 	    sleep(threadFound, &ptable.lock);  //DOC: wait-sleep
 
 	  }
@@ -298,9 +301,11 @@ int kthread_mutex_lock(int mutex_id){
   if (m->locked == 1){ //mutex is locked so push the thread into the queue
 	 //   cprintf("the mutax is locked so thread %d is queued\n", thread->pid);
 		pushThreadToMutexQueue(thread, m);
+
+
+		release(m->queueLock);
 		acquire(&ptable.lock);
 		thread->state =BLOCKED;
-		release(m->queueLock);
 		//cprintf("***************** %d \n", cpu->ncli);
 		sched();
 		acquire(m->queueLock);
@@ -336,7 +341,9 @@ int kthread_mutex_unlock(int mutex_id){
       t =  popThreadToMutexQueue(m);
       acquire(&ptable.lock);
       t->state = RUNNABLE;
+
       release(&ptable.lock);
+      release(m->queueLock);
       return 0;
   }
 

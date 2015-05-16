@@ -23,7 +23,7 @@ struct {
 
 extern void forkret(void);
 extern void trapret(void);
-extern void decreaseNumOfThreadsAlive(void);
+//extern void decreaseNumOfThreadsAlive(void);
 
 static struct proc *initproc;
 
@@ -201,8 +201,22 @@ int fork(void) {
 	return pid;
 }
 
+
+// return 0 if all threads are zombies or unused. return 1 else
 int procIsAlive() {
-	return thread->proc->numOfThreads > 0;
+
+	struct thread * t;
+	//int res=0;
+
+	for (t = thread->proc->threads; t < &thread->proc->threads[NTHREAD]; t++) {
+
+		if (t->state!= UNUSED && t->state!= ZOMBIE){
+
+				return 1;
+		}
+	}
+
+	return 0;
 }
 
 // Exit the current process.  Does not return.
@@ -250,15 +264,15 @@ void exit(void) {
 	for (t = proc->threads; t < &proc->threads[NTHREAD]; t++) {
 		if (t->state != RUNNING && t->state != UNUSED && t != thread) {
 			t->state = ZOMBIE;
-			if (thread->proc->numOfThreads > 0)
-				decreaseNumOfThreadsAlive();
+
+
 
 		}
 	}
 
 	// Jump into the scheduler, never to return.
-	if (thread->proc->numOfThreads > 0)
-		decreaseNumOfThreadsAlive();
+
+
 	thread->state = ZOMBIE;
 	if (!procIsAlive())
 		proc->state = ZOMBIE;
