@@ -49,7 +49,7 @@ int mesa_cond_wait(mesa_cond_t* mCond,int mutex_id){
 	}
 	mCond->waitinCount++;
 	if (kthread_mutex_unlock(mutex_id)<0 &&
-		kthread_mutex_lock(mCond->mutexCV))
+		kthread_mutex_lock(mCond->mutexCV)<0)
 	{
 		mCond->waitinCount--;
 		return -1;

@@ -2,7 +2,13 @@
 #define	MESA_SLOTS_MONITOR_H
 
 typedef struct mesa_slots_monitor {
-    //Your code here...
+
+
+	int Monitormutex;
+	struct mesa_cond * empty, *full;
+	int slots;
+	int active;
+
 } mesa_slots_monitor_t;
 
 mesa_slots_monitor_t* mesa_slots_monitor_alloc();

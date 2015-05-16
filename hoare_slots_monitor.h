@@ -2,7 +2,11 @@
 #define	HOARE_SLOTS_MONITOR_H
 
 typedef struct hoare_slots_monitor {
-    //Your code here...
+	int Monitormutex;
+	struct hoare_cond * empty;
+	struct hoare_cond *full;
+	int slots;
+	int active;
 } hoare_slots_monitor_t;
 
 hoare_slots_monitor_t* hoare_slots_monitor_alloc();

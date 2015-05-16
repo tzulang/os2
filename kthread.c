@@ -32,7 +32,7 @@ extern void wakeup1(void *chan);
 void
 increaseNumOfThreadsAlive(void){
 	int i = thread->proc->numOfThreads++;
-	cprintf("num o threads %d \n" , i);
+	//cprintf("num o threads %d \n" , i);
 	if(i > NTHREAD)
 		panic("Too many threads");
 }
@@ -42,7 +42,7 @@ void
 decreaseNumOfThreadsAlive(void){
 
 	int i = thread->proc->numOfThreads--;
-	cprintf("num o threads %d 0\n" , i);
+	//cprintf("num o threads %d 0\n" , i);
 	if(i < 0)
 		panic("Not enough threads");
 }
@@ -264,16 +264,16 @@ int kthread_mutex_dealloc(int mutex_id){
 
   struct kthread_mutex_t *m;
 
-  cprintf("1- %d\n", mutex_id);
+  //cprintf("1- %d\n", mutex_id);
   for ( m= mutextable.mutexes; m < &mutextable.mutexes[MAX_MUTEXES]; m++){
 
 
 	  if(  m->id== mutex_id ){    //mutesx is not locked
-		  cprintf("id-%d  st-%d  locked %d\n", m->id , m->state, m->locked);
+		  //cprintf("id-%d  st-%d  locked %d\n", m->id , m->state, m->locked);
 		  if(  m->state==USED_MUTEX &&  !m->locked ){
 					  m->state = UNUSED_MUTEX;
 					  m->id= -1;
-					  cprintf("dealoc\n");
+					  //cprintf("dealoc\n");
 					  return 0;
 		  }
 		  return -1;
@@ -301,11 +301,13 @@ int kthread_mutex_lock(int mutex_id){
 		acquire(&ptable.lock);
 		thread->state =BLOCKED;
 		release(m->queueLock);
+		//cprintf("***************** %d \n", cpu->ncli);
 		sched();
+		acquire(m->queueLock);
 		release(&ptable.lock);
 
   }
- // cprintf("the mutax is unlocked so thread %d is locking it\n", thread->pid);
+ //cprintf("the mutax is unlocked so thread %d is locking it\n", thread->pid);
   m->locked = 1;
 
   release(m->queueLock);
@@ -368,9 +370,8 @@ int kthread_mutex_yieldlock(int mutex_id1, int mutex_id2){
 	    t->state = RUNNABLE;
 	    pushThreadToMutexQueue(thread, m2);
 		release(m2->queueLock);
-
-
 		sched();
+
 		release(&ptable.lock);
 
 		return 0;
